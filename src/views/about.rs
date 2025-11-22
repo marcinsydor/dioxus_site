@@ -2,6 +2,7 @@ use dioxus::prelude::*;
 use serde::{Deserialize, Serialize};
 
 const ABOUT_DATA: &str = include_str!("../../assets/data/about.json");
+const ABOUT_CSS: Asset = asset!("/assets/styling/about.css");
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 struct AboutData {
@@ -58,52 +59,54 @@ pub fn About() -> Element {
     let data = about_data();
 
     rsx! {
+        document::Link { rel: "stylesheet", href: ABOUT_CSS }
+
         div {
-            class: "max-w-4xl mx-auto p-6 space-y-8",
+            class: "about-container",
 
             // Header Section
             header {
-                class: "text-center border-b pb-8",
+                class: "about-header",
                 h1 {
-                    class: "text-4xl font-bold text-gray-800 mb-2",
+                    class: "about-name",
                     "{data.name}"
                 }
                 h2 {
-                    class: "text-xl text-gray-600 mb-2",
+                    class: "about-title",
                     "{data.title}"
                 }
                 p {
-                    class: "text-gray-500",
+                    class: "about-location",
                     "📍 {data.location}"
                 }
             }
 
             // Bio Section
             section {
-                class: "bg-gray-50 rounded-lg p-6",
+                class: "about-bio-section",
                 h3 {
-                    class: "text-2xl font-semibold text-gray-800 mb-4",
+                    class: "about-section-title",
                     "About Me"
                 }
                 p {
-                    class: "text-gray-700 leading-relaxed text-lg",
+                    class: "about-bio-text",
                     "{data.bio}"
                 }
             }
 
             // Skills Section
             section {
-                class: "space-y-4",
+                class: "about-section",
                 h3 {
-                    class: "text-2xl font-semibold text-gray-800 mb-4",
+                    class: "about-section-title",
                     "Skills"
                 }
                 div {
-                    class: "flex flex-wrap gap-2",
+                    class: "skills-grid",
                     for skill in data.skills {
                         span {
                             key: "{skill}",
-                            class: "px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium",
+                            class: "skill-tag",
                             "{skill}"
                         }
                     }
@@ -112,34 +115,34 @@ pub fn About() -> Element {
 
             // Experience Section
             section {
-                class: "space-y-4",
+                class: "about-section",
                 h3 {
-                    class: "text-2xl font-semibold text-gray-800 mb-4",
+                    class: "about-section-title",
                     "Experience"
                 }
                 for exp in data.experience {
                     div {
                         key: "{exp.company}-{exp.position}",
-                        class: "bg-white border border-gray-200 rounded-lg p-6 shadow-sm",
+                        class: "experience-card",
                         div {
-                            class: "flex justify-between items-start mb-2",
+                            class: "experience-header",
                             div {
                                 h4 {
-                                    class: "text-xl font-semibold text-gray-800",
+                                    class: "experience-position",
                                     "{exp.position}"
                                 }
                                 p {
-                                    class: "text-gray-600 font-medium",
+                                    class: "experience-company",
                                     "{exp.company}"
                                 }
                             }
                             span {
-                                class: "text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded",
+                                class: "experience-duration",
                                 "{exp.duration}"
                             }
                         }
                         p {
-                            class: "text-gray-700",
+                            class: "experience-description",
                             "{exp.description}"
                         }
                     }
@@ -148,18 +151,18 @@ pub fn About() -> Element {
 
             // Interests Section
             section {
-                class: "space-y-4",
+                class: "about-section",
                 h3 {
-                    class: "text-2xl font-semibold text-gray-800 mb-4",
+                    class: "about-section-title",
                     "Interests"
                 }
-                ul {
-                    class: "grid grid-cols-1 md:grid-cols-2 gap-2",
+                div {
+                    class: "interests-grid",
                     for interest in data.interests {
-                        li {
+                        div {
                             key: "{interest}",
-                            class: "flex items-center text-gray-700",
-                            span { class: "mr-2", "•" }
+                            class: "interest-item",
+                            span { class: "interest-bullet", "•" }
                             "{interest}"
                         }
                     }
@@ -168,42 +171,42 @@ pub fn About() -> Element {
 
             // Contact Section
             section {
-                class: "bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6",
+                class: "contact-section",
                 h3 {
-                    class: "text-2xl font-semibold text-gray-800 mb-4",
+                    class: "about-section-title",
                     "Contact"
                 }
                 div {
-                    class: "grid grid-cols-1 md:grid-cols-3 gap-4",
+                    class: "contact-grid",
 
                     div {
-                        class: "flex items-center space-x-2",
-                        span { class: "text-2xl", "📧" }
+                        class: "contact-item",
+                        span { class: "contact-icon", "📧" }
                         a {
                             href: "mailto:{data.contact.email}",
-                            class: "text-blue-600 hover:text-blue-800 underline",
+                            class: "contact-link",
                             "{data.contact.email}"
                         }
                     }
 
                     div {
-                        class: "flex items-center space-x-2",
-                        span { class: "text-2xl", "🌐" }
+                        class: "contact-item",
+                        span { class: "contact-icon", "🌐" }
                         a {
                             href: "{data.contact.website}",
                             target: "_blank",
-                            class: "text-blue-600 hover:text-blue-800 underline",
+                            class: "contact-link",
                             "Website"
                         }
                     }
 
                     div {
-                        class: "flex items-center space-x-2",
-                        span { class: "text-2xl", "⚡" }
+                        class: "contact-item",
+                        span { class: "contact-icon", "⚡" }
                         a {
                             href: "https://github.com/{data.contact.github}",
                             target: "_blank",
-                            class: "text-blue-600 hover:text-blue-800 underline",
+                            class: "contact-link",
                             "GitHub"
                         }
                     }
@@ -212,10 +215,10 @@ pub fn About() -> Element {
 
             // Footer
             footer {
-                class: "text-center text-sm text-gray-500 pt-8 border-t",
-                p { "Last updated: {data.updated}" }
+                class: "about-footer",
+                p { class: "footer-updated", "Last updated: {data.updated}" }
                 p {
-                    class: "mt-1",
+                    class: "footer-note",
                     "Generated statically with Dioxus SSG 🦀"
                 }
             }
