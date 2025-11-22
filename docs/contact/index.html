@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact - Dioxus Site</title>
     <meta name="description" content="Get in touch with me through this interactive contact form">
+    <link rel="preload" as="fetch" href="/assets/dioxus_site_bg-dxh3252dca771df691.wasm" crossorigin>
     <style>
         
 body {
@@ -307,7 +308,7 @@ body {
     </div>
 
 <script type="module">
-    import { mount_contact_component, wasm_main } from '/assets/dioxus_site-dxh2fa2a3d9eb2a2b8.js';
+    import { mount_contact_component, wasm_main } from '/assets/dioxus_site-dxhbe74aa814c46a576.js';
 
     async function loadWasmContactForm() {
         try {
@@ -316,10 +317,10 @@ body {
             // Wait for the auto-initialization to complete
             // The module auto-initializes on import, so we need to wait for it
             let retries = 0;
-            const maxRetries = 50; // 5 seconds max (50 * 100ms)
+            const maxRetries = 500; // 5 seconds max (500 * 10ms)
 
             while (!globalThis.__dx_mainWasm && retries < maxRetries) {
-                await new Promise(resolve => setTimeout(resolve, 100));
+                await new Promise(resolve => setTimeout(resolve, 10));
                 retries++;
             }
 
@@ -331,9 +332,6 @@ body {
 
             // Initialize the Dioxus runtime
             wasm_main();
-
-            // Wait a bit for WASM initialization
-            await new Promise(resolve => setTimeout(resolve, 100));
 
             // Mount the Dioxus Contact component
             mount_contact_component();

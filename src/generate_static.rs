@@ -601,15 +601,25 @@ fn create_html_document_with_css(
     description: &str,
     content: &str,
     js_path: Option<&str>,
+    wasm_path: Option<&str>,
     additional_css: Option<&str>,
 ) -> String {
     let js_import = js_path
         .map(|path| format!(r#"<script type="module" src="{}"></script>"#, path))
         .unwrap_or_default();
 
+    let wasm_preload = wasm_path
+        .map(|path| {
+            format!(
+                r#"<link rel="preload" as="fetch" href="{}" crossorigin>"#,
+                path
+            )
+        })
+        .unwrap_or_default();
+
     let extra_css = additional_css.unwrap_or("");
 
-    // Include base CSS styles
+    // Include base CSS and preload hints
     let base_css = r#"
 body {
     background-color: #0f1116;
@@ -817,6 +827,7 @@ body {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{}</title>
     <meta name="description" content="{}">
+    {}
     <style>
         {}
         {}
@@ -827,7 +838,7 @@ body {
     {}
 </body>
 </html>"#,
-        title, description, base_css, extra_css, js_import, content
+        title, description, wasm_preload, base_css, extra_css, js_import, content
     )
 }
 
@@ -968,10 +979,10 @@ pub fn generate_hybrid_contact_page(
             // Wait for the auto-initialization to complete
             // The module auto-initializes on import, so we need to wait for it
             let retries = 0;
-            const maxRetries = 50; // 5 seconds max (50 * 100ms)
+            const maxRetries = 500; // 5 seconds max (500 * 10ms)
 
             while (!globalThis.__dx_mainWasm && retries < maxRetries) {{
-                await new Promise(resolve => setTimeout(resolve, 100));
+                await new Promise(resolve => setTimeout(resolve, 10));
                 retries++;
             }}
 
@@ -983,9 +994,6 @@ pub fn generate_hybrid_contact_page(
 
             // Initialize the Dioxus runtime
             wasm_main();
-
-            // Wait a bit for WASM initialization
-            await new Promise(resolve => setTimeout(resolve, 100));
 
             // Mount the Dioxus Contact component
             mount_contact_component();
@@ -1059,6 +1067,7 @@ pub fn generate_hybrid_contact_page(
         "Get in touch with me through this interactive contact form",
         &content,
         None, // Don't add script tag here - we import it manually in the inline script
+        Some(&wasm_path), // Preload the WASM file for faster loading
         Some(additional_css),
     );
 
