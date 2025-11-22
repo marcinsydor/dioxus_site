@@ -1,4 +1,4 @@
-.PHONY: build build-web generate-static deploy publish clean help
+.PHONY: build build-web build-hybrid generate-static deploy publish clean help
 
 # Build the Dioxus site for web (SPA mode)
 build-web:
@@ -14,6 +14,16 @@ generate-static:
 	@echo "🏗️  Generating static site..."
 	cargo run --bin generate_static --features ssr
 	@echo "✅ Static site generation complete!"
+
+# Build hybrid site (static + interactive Contact page with WASM)
+build-hybrid: generate-static
+	@echo "🔧 Building interactive Contact page with WASM..."
+	dx build --release --features web
+	@echo "📦 Adding interactive Contact page to static output..."
+	mkdir -p static_output/contact/assets
+	cp target/dx/dioxus_site/release/web/public/index.html static_output/contact/contact_dynamic.html
+	cp -r target/dx/dioxus_site/release/web/public/assets/* static_output/contact/assets/
+	@echo "✅ Hybrid build complete! Static pages + Interactive Contact with WASM"
 
 # Build static site (default)
 build: generate-static
@@ -57,6 +67,7 @@ help:
 	@echo "Available commands:"
 	@echo "  make build         - Generate static site (SSG) - default"
 	@echo "  make build-web     - Build Dioxus site for web (SPA)"
+	@echo "  make build-hybrid  - Build static site + interactive Contact page with WASM"
 	@echo "  make generate-static - Generate static HTML files for all routes"
 	@echo "  make deploy        - Build static site and prepare for GitHub Pages"
 	@echo "  make publish       - Build, deploy, commit and push to GitHub"
@@ -68,3 +79,8 @@ help:
 	@echo "  - No JavaScript required for basic navigation"
 	@echo "  - Perfect for SEO and static hosting"
 	@echo "  - Works with JavaScript disabled"
+	@echo ""
+	@echo "🚀 Hybrid Build (build-hybrid):"
+	@echo "  - All pages are static HTML"
+	@echo "  - Contact page gets interactive WASM functionality"
+	@echo "  - Best of both worlds: performance + interactivity"

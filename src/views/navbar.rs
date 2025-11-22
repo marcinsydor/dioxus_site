@@ -24,6 +24,10 @@ pub fn Navbar() -> Element {
                 "About"
             }
             Link {
+                to: Route::Contact {},
+                "Contact"
+            }
+            Link {
                 to: Route::Blog { id: 1 },
                 "Blog"
             }

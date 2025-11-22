@@ -20,6 +20,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Generate static pages
     generate_home_page(output_dir)?;
     generate_about_page(output_dir)?;
+    generate_contact_page(output_dir)?;
     generate_blog_pages(output_dir)?;
 
     // Copy assets
@@ -37,6 +38,7 @@ fn generate_home_page(output_dir: &Path) -> Result<(), Box<dyn std::error::Error
     let content = r#"<div id="navbar">
         <a href="/">Home</a>
         <a href="/about">About</a>
+        <a href="/contact">Contact</a>
         <a href="/blog/1">Blog</a>
     </div>
     <div class="container">
@@ -72,6 +74,7 @@ fn generate_about_page(output_dir: &Path) -> Result<(), Box<dyn std::error::Erro
         r#"<div id="navbar">
         <a href="/">Home</a>
         <a href="/about">About</a>
+        <a href="/contact">Contact</a>
         <a href="/blog/1">Blog</a>
     </div>
     <div class="about-container">
@@ -198,6 +201,138 @@ fn generate_about_page(output_dir: &Path) -> Result<(), Box<dyn std::error::Erro
     Ok(())
 }
 
+fn generate_contact_page(output_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
+    println!("🔨 Generating: /contact");
+
+    let content = r#"<div id="navbar">
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+        <a href="/blog/1">Blog</a>
+    </div>
+    <div class="contact-container">
+        <header class="contact-header">
+            <h1 class="contact-title">Contact Me</h1>
+            <p class="contact-subtitle">Get in touch! This page will demonstrate dynamic JavaScript/WASM functionality.</p>
+        </header>
+
+        <div class="contact-content">
+            <div class="contact-info">
+                <h2>Contact Information</h2>
+                <div class="contact-methods">
+                    <div class="contact-method">
+                        <span class="contact-icon">📧</span>
+                        <div>
+                            <h3>Email</h3>
+                            <a href="mailto:marcin.sydor@sky.uk" class="contact-link">marcin.sydor@sky.uk</a>
+                        </div>
+                    </div>
+                    <div class="contact-method">
+                        <span class="contact-icon">💼</span>
+                        <div>
+                            <h3>LinkedIn</h3>
+                            <p>Connect with me professionally</p>
+                        </div>
+                    </div>
+                    <div class="contact-method">
+                        <span class="contact-icon">⚡</span>
+                        <div>
+                            <h3>GitHub</h3>
+                            <a href="https://github.com/marcinsydor" target="_blank" class="contact-link">@marcinsydor</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-form-section">
+                <h2>Send a Message</h2>
+
+                <div class="js-functionality-notice">
+                    <p>🚀 <strong>Dynamic Form Demo:</strong> This form will demonstrate JavaScript/WASM functionality when enhanced with dynamic features.</p>
+                </div>
+
+                <div class="static-form-notice">
+                    <h3>📄 Static Version</h3>
+                    <p>You're viewing the static HTML version. The form below is for display purposes.</p>
+                    <p>When JavaScript is enabled, this becomes a fully interactive form with:</p>
+                    <ul>
+                        <li>Real-time validation</li>
+                        <li>Dynamic state management</li>
+                        <li>Client-side form processing</li>
+                        <li>WASM-powered functionality</li>
+                    </ul>
+                </div>
+
+                <form class="contact-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Name *</label>
+                            <input type="text" id="name" class="form-input" placeholder="Your full name" />
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" class="form-input" placeholder="your.email@example.com" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject">Subject *</label>
+                        <input type="text" id="subject" class="form-input" placeholder="What's this about?" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Message *</label>
+                        <textarea id="message" class="form-textarea" placeholder="Tell me what's on your mind..." rows="6"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-primary disabled">Send Message ✨ (Demo)</button>
+                        <button type="button" class="btn btn-secondary">Reset Form</button>
+                    </div>
+
+                    <div class="form-note">
+                        <p>* This is a static demo form. Enable JavaScript to see dynamic functionality.</p>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="tech-details">
+            <h2>🔧 Technical Implementation</h2>
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <h3>🦀 WebAssembly</h3>
+                    <p>Dynamic version uses Rust compiled to WASM for all interactive functionality</p>
+                </div>
+                <div class="tech-item">
+                    <h3>⚡ Reactive State</h3>
+                    <p>Real-time form validation and state management using Dioxus signals</p>
+                </div>
+                <div class="tech-item">
+                    <h3>🏗️ Hybrid Architecture</h3>
+                    <p>Static HTML foundation with dynamic JavaScript/WASM enhancement</p>
+                </div>
+                <div class="tech-item">
+                    <h3>📱 Progressive Enhancement</h3>
+                    <p>Works without JS, enhanced with dynamic features when available</p>
+                </div>
+            </div>
+        </div>
+    </div>"#;
+
+    let html = create_html_document(
+        content,
+        "Contact - Dioxus Site",
+        "Get in touch with me through this contact form",
+    );
+
+    let contact_dir = output_dir.join("contact");
+    fs::create_dir_all(&contact_dir)?;
+    fs::write(contact_dir.join("index.html"), html)?;
+    println!("✅ Generated: contact/index.html");
+    Ok(())
+}
+
 fn generate_blog_pages(output_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
     let blog_ids = vec![1, 2, 3];
 
@@ -208,6 +343,7 @@ fn generate_blog_pages(output_dir: &Path) -> Result<(), Box<dyn std::error::Erro
             r#"<div id="navbar">
             <a href="/">Home</a>
             <a href="/about">About</a>
+            <a href="/contact">Contact</a>
             <a href="/blog/1">Blog</a>
         </div>
         <div class="container">
@@ -279,6 +415,7 @@ fn create_html_document(body_content: &str, title: &str, description: &str) -> S
     <link rel="stylesheet" href="/assets/styling/main.css">
     <link rel="stylesheet" href="/assets/styling/navbar.css">
     <link rel="stylesheet" href="/assets/styling/about.css">
+    <link rel="stylesheet" href="/assets/styling/contact.css">
     <link rel="stylesheet" href="/assets/styling/blog.css">
     <link rel="stylesheet" href="/assets/styling/echo.css">
     <link rel="stylesheet" href="/assets/tailwind.css">

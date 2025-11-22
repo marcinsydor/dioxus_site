@@ -19,3 +19,6 @@ pub use navbar::Navbar;
 
 mod about;
 pub use about::About;
+
+mod contact;
+pub use contact::Contact;
