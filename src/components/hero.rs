@@ -13,7 +13,7 @@ pub fn Hero() -> Element {
             img { src: HEADER_SVG, id: "header" }
             div { id: "links",
                 // The RSX macro also supports text nodes surrounded by quotes
-                a { href: "https://dioxuslabs.com/learn/0.7/", "📚 Learn Dioxus" }
+                a { href: "https://dioxuslabs.com/learn/0.7/", "📚 Learn Dioxus 3" }
                 a { href: "https://dioxuslabs.com/awesome", "🚀 Awesome Dioxus" }
                 a { href: "https://github.com/dioxus-community/", "📡 Community Libraries" }
                 a { href: "https://github.com/DioxusLabs/sdk", "⚙️ Dioxus Development Kit" }

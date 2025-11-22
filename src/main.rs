@@ -42,14 +42,10 @@ const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
 #[cfg(feature = "fullstack")]
 #[server(endpoint = "static_routes", output = server_fn::codec::Json)]
 async fn static_routes() -> Result<Vec<String>, ServerFnError> {
-    let mut static_routes = Route::static_routes()
+    let static_routes = Route::static_routes()
         .into_iter()
         .map(|route| route.to_string())
         .collect::<Vec<_>>();
-
-    // Add the components preview routes manually
-    static_routes.push("/components/".to_string());
-    static_routes.push("/components/component/".to_string());
 
     Ok(static_routes)
 }
