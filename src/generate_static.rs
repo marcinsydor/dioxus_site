@@ -965,10 +965,12 @@ pub fn generate_hybrid_contact_page(
         try {{
             console.log('🚀 Loading WASM Contact Form...');
 
-            // The WASM module auto-initializes when imported, so we don't need to call init()
-            // Just call wasm_main() to initialize the Dioxus runtime
-            wasm_main();
+            // Wait for the WASM module to initialize
+            await init();
             console.log('✅ WASM module initialized successfully');
+
+            // Initialize the Dioxus runtime
+            wasm_main();
 
             // Wait a bit for WASM initialization
             await new Promise(resolve => setTimeout(resolve, 100));

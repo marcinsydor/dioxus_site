@@ -307,16 +307,18 @@ body {
     </div>
 
 <script type="module">
-    import init, { mount_contact_component, wasm_main } from '/assets/dioxus_site-dxh432ca6d2b8ec498.js';
+    import init, { mount_contact_component, wasm_main } from '/assets/dioxus_site-dxh3f2e901c3eaa095.js';
 
     async function loadWasmContactForm() {
         try {
             console.log('🚀 Loading WASM Contact Form...');
 
-            // The WASM module auto-initializes when imported, so we don't need to call init()
-            // Just call wasm_main() to initialize the Dioxus runtime
-            wasm_main();
+            // Wait for the WASM module to initialize
+            await init();
             console.log('✅ WASM module initialized successfully');
+
+            // Initialize the Dioxus runtime
+            wasm_main();
 
             // Wait a bit for WASM initialization
             await new Promise(resolve => setTimeout(resolve, 100));
