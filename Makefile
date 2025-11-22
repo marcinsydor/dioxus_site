@@ -19,10 +19,10 @@ generate-static:
 build-hybrid:
 	@echo "🧹 Cleaning static output..."
 	rm -rf static_output
-	@echo "🏗️  Generating static site (except contact)..."
-	cargo run --bin generate_static --features ssr -- --skip-contact
 	@echo "🔧 Building interactive Contact page with WASM..."
 	dx build --release --features web
+	@echo "🏗️  Generating static site (except contact)..."
+	cargo run --bin generate_static --features ssr -- --skip-contact
 	@echo "📦 Adding WASM assets to static output..."
 	mkdir -p static_output/assets
 	cp -r target/dx/dioxus_site/release/web/public/assets/* static_output/assets/

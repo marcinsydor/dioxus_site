@@ -999,6 +999,7 @@ dependencies = [
  "console_error_panic_hook",
  "dioxus",
  "dioxus-ssr",
+ "dioxus-web",
  "js-sys",
  "serde",
  "serde_json",
@@ -3081,6 +3082,8 @@ dependencies = [
  "cfg-if",
  "once_cell",
  "rustversion",
+ "serde",
+ "serde_json",
  "wasm-bindgen-macro",
  "wasm-bindgen-shared",
 ]

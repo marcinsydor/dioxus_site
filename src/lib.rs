@@ -12,7 +12,7 @@ mod components;
 /// Define a contact_app module for standalone WASM contact functionality
 mod contact_app;
 /// Define a views module that contains the UI for all Layouts and Routes for our app.
-mod views;
+pub mod views;
 
 pub use contact_app::start_contact_app;
 

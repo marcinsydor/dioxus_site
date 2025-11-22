@@ -596,29 +596,283 @@ fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<(), Box<dyn std::error::
     Ok(())
 }
 
+// Helper function to create HTML document with additional CSS
+fn create_html_document_with_css(
+    title: &str,
+    description: &str,
+    content: &str,
+    js_path: Option<&str>,
+    additional_css: Option<&str>,
+) -> String {
+    let js_import = js_path
+        .map(|path| format!(r#"<script type="module" src="{}"></script>"#, path))
+        .unwrap_or_default();
+
+    let extra_css = additional_css.unwrap_or("");
+
+    // Include base CSS styles
+    let base_css = r#"
+body {
+    background-color: #0f1116;
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 20px;
+}
+
+#hero {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#links {
+    width: 400px;
+    text-align: left;
+    font-size: x-large;
+    color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+#links a {
+    color: white;
+    text-decoration: none;
+    margin-top: 20px;
+    margin: 10px 0px;
+    border: white 1px solid;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+#links a:hover {
+    background-color: #1f1f1f;
+    cursor: pointer;
+}
+
+#header {
+    max-width: 1200px;
+}
+
+/* Additional contact page styles */
+.contact-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.contact-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.contact-title {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.contact-subtitle {
+    font-size: 1.25rem;
+    color: #9ca3af;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.contact-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+}
+
+@media (max-width: 768px) {
+    .contact-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+}
+
+.contact-info h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #f9fafb;
+}
+
+.contact-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.contact-method {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #1f2937;
+    border-radius: 0.75rem;
+    border: 1px solid #374151;
+}
+
+.contact-icon {
+    font-size: 1.5rem;
+    padding: 0.75rem;
+    background: #3b82f6;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.contact-method h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+    color: #f9fafb;
+}
+
+.contact-method p {
+    margin: 0;
+    color: #9ca3af;
+    font-size: 0.875rem;
+}
+
+.contact-link {
+    color: #60a5fa !important;
+    text-decoration: none;
+}
+
+.contact-link:hover {
+    color: #93c5fd !important;
+    text-decoration: underline;
+}
+
+.contact-form-section h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #f9fafb;
+}
+
+.tech-details {
+    padding: 2rem;
+    background: #1f2937;
+    border-radius: 1rem;
+    border: 1px solid #374151;
+}
+
+.tech-details h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #f9fafb;
+    text-align: center;
+}
+
+.tech-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .tech-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.tech-item {
+    padding: 1.5rem;
+    background: #111827;
+    border-radius: 0.75rem;
+    border: 1px solid #374151;
+}
+
+.tech-item h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0 0 0.75rem 0;
+    color: #f9fafb;
+}
+
+.tech-item p {
+    margin: 0;
+    color: #9ca3af;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+"#;
+
+    format!(
+        r#"<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{}</title>
+    <meta name="description" content="{}">
+    <style>
+        {}
+        {}
+    </style>
+    {}
+</head>
+<body>
+    {}
+</body>
+</html>"#,
+        title, description, base_css, extra_css, js_import, content
+    )
+}
+
 pub fn generate_hybrid_contact_page(
     output_dir: &Path,
     wasm_assets_dir: &Path,
 ) -> Result<(), Box<dyn std::error::Error>> {
     println!("🔨 Generating: /contact (hybrid with WASM)");
 
-    // Find the WASM and JS files
-    let mut wasm_file = None;
-    let mut js_file = None;
+    // Find the most recent JS file with our exports
+    let mut js_files = Vec::new();
 
     for entry in std::fs::read_dir(wasm_assets_dir)? {
         let entry = entry?;
         let file_name = entry.file_name().to_string_lossy().to_string();
 
-        if file_name.contains("dioxus_site_bg") && file_name.ends_with(".wasm") {
-            wasm_file = Some(format!("/assets/{}", file_name));
-        } else if file_name.contains("dioxus_site") && file_name.ends_with(".js") {
-            js_file = Some(format!("/assets/{}", file_name));
+        if file_name.contains("dioxus_site") && file_name.ends_with(".js") {
+            let file_path = entry.path();
+            if let Ok(metadata) = std::fs::metadata(&file_path) {
+                js_files.push((
+                    file_name,
+                    metadata
+                        .modified()
+                        .unwrap_or(std::time::SystemTime::UNIX_EPOCH),
+                ));
+            }
         }
     }
 
-    let wasm_path = wasm_file.ok_or("WASM file not found")?;
-    let js_path = js_file.ok_or("JS file not found")?;
+    // Sort by modification time (newest first) and find one with exports
+    js_files.sort_by(|a, b| b.1.cmp(&a.1));
+
+    let mut js_path = None;
+    for (file_name, _) in js_files {
+        let full_path = wasm_assets_dir.join(&file_name);
+        if let Ok(content) = std::fs::read_to_string(&full_path) {
+            if content.contains("mount_contact_component") {
+                js_path = Some(format!("/assets/{}", file_name));
+                break;
+            }
+        }
+    }
+
+    let js_path = js_path.ok_or("JS file with exports not found")?;
 
     let content = format!(
         r#"<div id="navbar">
@@ -664,16 +918,19 @@ pub fn generate_hybrid_contact_page(
             <div class="contact-form-section">
                 <h2>Send a Message</h2>
 
-                <div class="wasm-loading-notice">
-                    <p>🚀 <strong>Interactive WASM Form:</strong> Loading WebAssembly-powered contact form...</p>
-                    <div id="wasm-fallback" style="display: none;">
-                        <p>⚠️ WebAssembly failed to load. Please enable JavaScript or try refreshing the page.</p>
+                <div class="wasm-loading-notice" style="padding: 1rem; margin-bottom: 1rem; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 0.5rem; color: #0369a1;">
+                    <p style="margin: 0;">🚀 <strong>Interactive WASM Form:</strong> Loading Dioxus Contact component...</p>
+                    <div style="width: 100%; height: 4px; background: #e0f2fe; border-radius: 2px; margin-top: 0.5rem; overflow: hidden;">
+                        <div style="height: 100%; background: #0ea5e9; animation: loading 2s infinite;"></div>
                     </div>
                 </div>
 
                 <!-- This will be replaced by the WASM contact app -->
-                <div id="contact-form-placeholder">
-                    <p>Loading interactive form...</p>
+                <div id="contact-form-placeholder" style="min-height: 400px; display: flex; align-items: center; justify-content: center; background: #f9fafb; border-radius: 0.5rem; border: 2px dashed #d1d5db;">
+                    <div style="text-align: center; color: #6b7280;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">⏳</div>
+                        <p style="margin: 0;">Initializing interactive Dioxus form...</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -682,8 +939,8 @@ pub fn generate_hybrid_contact_page(
             <h2>🔧 Technical Implementation</h2>
             <div class="tech-grid">
                 <div class="tech-item">
-                    <h3>🦀 WebAssembly</h3>
-                    <p>Interactive form powered by Rust compiled to WASM ({wasm_path})</p>
+                    <h3>🦀 WebAssembly + Dioxus</h3>
+                    <p>Interactive form powered by Rust compiled to WASM using the Dioxus framework</p>
                 </div>
                 <div class="tech-item">
                     <h3>⚡ Reactive State</h3>
@@ -691,7 +948,7 @@ pub fn generate_hybrid_contact_page(
                 </div>
                 <div class="tech-item">
                     <h3>🏗️ Hybrid Architecture</h3>
-                    <p>Server-rendered HTML enhanced with client-side WASM</p>
+                    <p>Server-rendered HTML enhanced with client-side WASM using Dioxus components</p>
                 </div>
                 <div class="tech-item">
                     <h3>📱 Progressive Enhancement</h3>
@@ -702,25 +959,61 @@ pub fn generate_hybrid_contact_page(
     </div>
 
 <script type="module">
-    import init, {{ start_contact_app }} from '{js_path}';
+    import init, {{ mount_contact_component, wasm_main }} from '{js_path}';
 
-    async function loadWasm() {{
+    async function loadWasmContactForm() {{
         try {{
+            console.log('🚀 Loading WASM Contact Form...');
+
             // Initialize the WASM module
             await init();
-            console.log('✅ WASM loaded successfully');
+            console.log('✅ WASM module loaded successfully');
 
-            // Start the contact app
-            start_contact_app();
-            console.log('✅ Contact app started');
+            // Initialize WASM (calls wasm_main)
+            wasm_main();
+
+            // Wait a bit for WASM initialization
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // Mount the Dioxus Contact component
+            mount_contact_component();
+            console.log('✅ Dioxus Contact component mounted');
+
+            // Hide the loading notice
+            const loadingNotice = document.querySelector('.wasm-loading-notice');
+            if (loadingNotice) {{
+                loadingNotice.style.display = 'none';
+            }}
 
         }} catch (error) {{
-            console.error('❌ Failed to load WASM:', error);
-            document.getElementById('wasm-fallback').style.display = 'block';
+            console.error('❌ Failed to load WASM Contact Form:', error);
+
+            // Show fallback message
+            const placeholder = document.getElementById('contact-form-placeholder');
+            if (placeholder) {{
+                placeholder.innerHTML = `
+                    <div style="padding: 2rem; text-align: center; background: #fef2f2; border: 1px solid #fecaca; border-radius: 0.5rem; color: #dc2626;">
+                        <h3>⚠️ Contact Form Loading Error</h3>
+                        <p>The interactive contact form failed to load. Please try refreshing the page or contact me directly at <a href="mailto:marcin.sydor@sky.uk">marcin.sydor@sky.uk</a></p>
+                        <p><small>Error: ${{error.message || 'WASM module failed to initialize'}}</small></p>
+                    </div>
+                `;
+            }}
+
+            // Hide the loading notice on error too
+            const loadingNotice = document.querySelector('.wasm-loading-notice');
+            if (loadingNotice) {{
+                loadingNotice.style.display = 'none';
+            }}
         }}
     }}
 
-    loadWasm();
+    // Load WASM when DOM is ready
+    if (document.readyState === 'loading') {{
+        document.addEventListener('DOMContentLoaded', loadWasmContactForm);
+    }} else {{
+        loadWasmContactForm();
+    }}
 </script>
 
 <noscript>
@@ -731,11 +1024,29 @@ pub fn generate_hybrid_contact_page(
 </noscript>"#
     );
 
-    let html_doc = create_html_document(
+    // Add CSS for loading animation
+    let additional_css = r#"
+    @keyframes loading {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    .contact-form-container {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    "#;
+
+    let html_doc = create_html_document_with_css(
         "Contact - Dioxus Site",
         "Get in touch with me through this interactive contact form",
         &content,
         Some(&js_path),
+        Some(additional_css),
     );
 
     let contact_dir = output_dir.join("contact");
