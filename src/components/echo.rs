@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 const ECHO_CSS: Asset = asset!("/assets/styling/echo.css");
 
-/// Echo component that demonstrates fullstack server functions.
+/// Echo component that demonstrates client-side state management.
 #[component]
 pub fn Echo() -> Element {
     // use_signal is a hook. Hooks in dioxus must be run in a consistent order every time the component is rendered.
@@ -17,26 +17,20 @@ pub fn Echo() -> Element {
 
         div {
             id: "echo",
-            h4 { "ServerFn Echo" }
+            h4 { "Client-Side Echo" }
             input {
                 placeholder: "Type here to echo...",
-                // `oninput` is an event handler that will run when the input changes. It can return either nothing or a future
-                // that will be run when the event runs.
-                oninput:  move |event| async move {
-                    // When we call the echo_server function from the client, it will fire a request to the server and return
-                    // the response. It handles serialization and deserialization of the request and response for us.
-                    let data = echo_server(event.value()).await.unwrap();
-
-                    // After we have the data from the server, we can set the state of the signal to the new value.
-                    // Since we read the `response` signal later in this component, the component will rerun.
-                    response.set(data);
+                // `oninput` is an event handler that will run when the input changes.
+                oninput: move |event| {
+                    // For a client-side only version, we just echo the input directly
+                    response.set(event.value());
                 },
             }
 
             // Signals can be called like a function to clone the current value of the signal
             if !response().is_empty() {
                 p {
-                    "Server echoed: "
+                    "Client echoed: "
                     // Since we read the signal inside this component, the component "subscribes" to the signal. Whenever
                     // the signal changes, the component will rerun.
                     i { "{response}" }
@@ -44,18 +38,4 @@ pub fn Echo() -> Element {
             }
         }
     }
-}
-
-// Server functions let us define public APIs on the server that can be called like a normal async function from the client.
-// Each server function needs to be annotated with the `#[post]`/`#[get]` attributes, accept and return serializable types, and return
-// a `Result` with the error type [`ServerFnError`].
-//
-// When the server function is called from the client, it will just serialize the arguments, call the API, and deserialize the
-// response.
-#[post("/api/echo")]
-async fn echo_server(input: String) -> Result<String> {
-    // The body of server function like this comment are only included on the server. If you have any server-only logic like
-    // database queries, you can put it here. Any imports for the server function should either be imported inside the function
-    // or imported under a `#[cfg(feature = "server")]` block.
-    Ok(input)
 }

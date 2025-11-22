@@ -1,8 +1,6 @@
-// The dioxus prelude contains a ton of common items used in dioxus apps. It's a good idea to import wherever you
-// need dioxus
 use dioxus::prelude::*;
 
-use views::{Blog, Home, Navbar};
+use views::{About, Blog, Home, Navbar};
 
 /// Define a components module that contains all shared components for our app.
 mod components;
@@ -24,6 +22,8 @@ enum Route {
         // the component for that route will be rendered. The component name that is rendered defaults to the variant name.
         #[route("/")]
         Home {},
+        #[route("/about")]
+        About {},
         // The route attribute can include dynamic parameters that implement [`std::str::FromStr`] and [`std::fmt::Display`] with the `:` syntax.
         // In this case, id will match any integer like `/blog/123` or `/blog/-456`.
         #[route("/blog/:id")]
@@ -39,38 +39,9 @@ const FAVICON: Asset = asset!("/assets/favicon.ico");
 const MAIN_CSS: Asset = asset!("/assets/styling/main.css");
 const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
 
-#[cfg(feature = "fullstack")]
-#[server(endpoint = "static_routes", output = server_fn::codec::Json)]
-async fn static_routes() -> Result<Vec<String>, ServerFnError> {
-    let static_routes = Route::static_routes()
-        .into_iter()
-        .map(|route| route.to_string())
-        .collect::<Vec<_>>();
-
-    Ok(static_routes)
-}
-
-#[cfg(feature = "server")]
-fn static_dir() -> std::path::PathBuf {
-    std::env::current_exe()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .join("public")
-}
-
 fn main() {
-    // The `launch` function is the main entry point for a dioxus app. It takes a component and renders it with the platform feature
-    // you have enabled
-    dioxus::LaunchBuilder::new()
-        .with_cfg(server_only! {
-            ServeConfig::builder().incremental(
-                dioxus::server::IncrementalRendererConfig::new()
-                    .static_dir(static_dir())
-                    .clear_cache(false)
-            )
-        })
-        .launch(App);
+    // Launch the app with simple configuration for SSG
+    dioxus::launch(App);
 }
 
 /// App is the main component of our app. Components are the building blocks of dioxus apps. Each component is a function
