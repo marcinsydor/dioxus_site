@@ -78,6 +78,11 @@
                         <p>⚠️ WebAssembly failed to load. Please enable JavaScript or try refreshing the page.</p>
                     </div>
                 </div>
+
+                <!-- This will be replaced by the WASM contact app -->
+                <div id="contact-form-placeholder">
+                    <p>Loading interactive form...</p>
+                </div>
             </div>
         </div>
 
@@ -105,12 +110,18 @@
     </div>
 
 <script type="module">
-    import init from '/assets/dioxus_site-dxh71439c95d26eaab0.js';
+    import init, { start_contact_app } from '/assets/dioxus_site-dxh71439c95d26eaab0.js';
 
     async function loadWasm() {
         try {
+            // Initialize the WASM module
             await init();
             console.log('✅ WASM loaded successfully');
+
+            // Start the contact app
+            start_contact_app();
+            console.log('✅ Contact app started');
+
         } catch (error) {
             console.error('❌ Failed to load WASM:', error);
             document.getElementById('wasm-fallback').style.display = 'block';
