@@ -560,11 +560,11 @@ pub fn ContactFormOnly() -> Element {
                 }
             }
             p {
-                "Form Valid (computed in WASM): "
+                "🔄 Live Validation Status (computed in WASM): "
                 if is_valid() {
-                    span { class: "status-valid", "✅ Yes" }
+                    span { class: "status-valid", "✅ Valid - Ready to submit!" }
                 } else {
-                    span { class: "status-invalid", "❌ No" }
+                    span { class: "status-invalid", "❌ Invalid - Please fill all fields" }
                 }
             }
         }
