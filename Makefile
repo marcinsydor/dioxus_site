@@ -17,8 +17,11 @@ generate-static:
 
 # Build hybrid site (static + interactive Contact page with WASM)
 build-hybrid:
-	@echo "🧹 Cleaning static output..."
+	@echo "🧹 Cleaning all build artifacts..."
 	rm -rf static_output
+	rm -rf target/dx/dioxus_site
+	rm -rf docs/assets/dioxus_site*.js
+	rm -rf docs/assets/dioxus_site*.wasm
 	@echo "🔧 Building interactive Contact page with WASM..."
 	dx build --release --features web
 	@echo "🏗️  Generating static site (except contact)..."
@@ -52,9 +55,12 @@ deploy: build
 
 # Deploy hybrid build with WASM-enabled contact page
 deploy-hybrid: build-hybrid
-	@echo "🧹 Cleaning docs folder..."
+	@echo "🧹 Cleaning docs folder completely..."
 	rm -rf docs
 	mkdir -p docs
+	@echo "🧹 Removing any old WASM/JS files..."
+	find . -name "dioxus_site-*.js" -not -path "./target/dx/*" -not -path "./static_output/*" -delete 2>/dev/null || true
+	find . -name "dioxus_site_bg-*.wasm" -not -path "./target/dx/*" -not -path "./static_output/*" -delete 2>/dev/null || true
 	@echo "📦 Copying hybrid static files to docs..."
 	cp -r static_output/* docs/
 	@echo "📄 Copying robots.txt..."
@@ -93,6 +99,9 @@ clean:
 	rm -rf target/
 	rm -rf static_output/
 	rm -rf docs
+	@echo "🧹 Removing old WASM/JS files..."
+	find . -name "dioxus_site-*.js" -delete 2>/dev/null || true
+	find . -name "dioxus_site_bg-*.wasm" -delete 2>/dev/null || true
 	mkdir -p docs
 	@echo "✅ Clean complete!"
 

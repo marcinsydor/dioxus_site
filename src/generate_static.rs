@@ -838,41 +838,41 @@ pub fn generate_hybrid_contact_page(
 ) -> Result<(), Box<dyn std::error::Error>> {
     println!("🔨 Generating: /contact (hybrid with WASM)");
 
-    // Find the most recent JS file with our exports
-    let mut js_files = Vec::new();
+    // Since we just built WASM, there should be exactly one JS file in the fresh build
+    let mut js_file = None;
+    let mut wasm_file = None;
+
+    println!(
+        "🔍 Looking for WASM assets in: {}",
+        wasm_assets_dir.display()
+    );
 
     for entry in std::fs::read_dir(wasm_assets_dir)? {
         let entry = entry?;
         let file_name = entry.file_name().to_string_lossy().to_string();
 
-        if file_name.contains("dioxus_site") && file_name.ends_with(".js") {
+        if file_name.starts_with("dioxus_site-") && file_name.ends_with(".js") {
+            println!("📄 Found JS file: {}", file_name);
+            // Verify this file has our exports
             let file_path = entry.path();
-            if let Ok(metadata) = std::fs::metadata(&file_path) {
-                js_files.push((
-                    file_name,
-                    metadata
-                        .modified()
-                        .unwrap_or(std::time::SystemTime::UNIX_EPOCH),
-                ));
+            if let Ok(content) = std::fs::read_to_string(&file_path) {
+                if content.contains("mount_contact_component") {
+                    js_file = Some(format!("/assets/{}", file_name));
+                    println!("✅ JS file contains mount_contact_component export");
+                } else {
+                    println!("⚠️  JS file does not contain mount_contact_component export");
+                }
             }
+        } else if file_name.starts_with("dioxus_site_bg-") && file_name.ends_with(".wasm") {
+            wasm_file = Some(format!("/assets/{}", file_name));
+            println!("🦀 Found WASM file: {}", file_name);
         }
     }
 
-    // Sort by modification time (newest first) and find one with exports
-    js_files.sort_by(|a, b| b.1.cmp(&a.1));
+    let js_path = js_file.ok_or("JS file with mount_contact_component export not found")?;
+    let _wasm_path = wasm_file.ok_or("WASM file not found")?;
 
-    let mut js_path = None;
-    for (file_name, _) in js_files {
-        let full_path = wasm_assets_dir.join(&file_name);
-        if let Ok(content) = std::fs::read_to_string(&full_path) {
-            if content.contains("mount_contact_component") {
-                js_path = Some(format!("/assets/{}", file_name));
-                break;
-            }
-        }
-    }
-
-    let js_path = js_path.ok_or("JS file with exports not found")?;
+    println!("🎯 Using JS file: {}", js_path);
 
     let content = format!(
         r#"<div id="navbar">
