@@ -9,14 +9,14 @@ dioxus = { version = "0.7.1", features = ["router"] }
 dioxus-ssr = "0.7.1"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-tokio = { version = "1.0", features = ["full"] }
 web-sys = { version = "0.3", features = ["Window", "Storage"] }
 chrono = { version = "0.4", features = ["serde"] }
+tokio = { version = "1.0", features = ["full"], optional = true }
 
 [features]
 default = ["web"]
 web = ["dioxus/web"]
-ssr = ["dioxus/ssr"]
+ssr = ["dioxus/ssr", "tokio"]
 
 [[bin]]
 name = "dioxus_site"
