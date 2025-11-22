@@ -965,12 +965,10 @@ pub fn generate_hybrid_contact_page(
         try {{
             console.log('🚀 Loading WASM Contact Form...');
 
-            // Initialize the WASM module with the correct WASM file path
-            await init('{wasm_path}');
-            console.log('✅ WASM module loaded successfully');
-
-            // Initialize WASM (calls wasm_main)
+            // The WASM module auto-initializes when imported, so we don't need to call init()
+            // Just call wasm_main() to initialize the Dioxus runtime
             wasm_main();
+            console.log('✅ WASM module initialized successfully');
 
             // Wait a bit for WASM initialization
             await new Promise(resolve => setTimeout(resolve, 100));
@@ -1022,8 +1020,7 @@ pub fn generate_hybrid_contact_page(
         <p style="margin: 0.5rem 0 0 0; color: #c33;">This page requires JavaScript for interactive functionality.</p>
     </div>
 </noscript>"#,
-        js_path = js_path,
-        wasm_path = wasm_path
+        js_path = js_path
     );
 
     // Add CSS for loading animation
