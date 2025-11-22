@@ -21,4 +21,4 @@ mod about;
 pub use about::About;
 
 mod contact;
-pub use contact::Contact;
+pub use contact::{Contact, ContactFormOnly};

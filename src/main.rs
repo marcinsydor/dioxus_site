@@ -1,5 +1,8 @@
 use dioxus::prelude::*;
-use dioxus_site::{views::Contact, App};
+use dioxus_site::{
+    views::{Contact, ContactFormOnly},
+    App,
+};
 use wasm_bindgen::prelude::*;
 use web_sys::{console, window};
 
@@ -14,8 +17,8 @@ fn ContactApp() -> Element {
     rsx! {
         div {
             class: "contact-form-container",
-            style: "width: 100%; padding: 1rem; background: white; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);",
-            Contact {}
+            style: "width: 100%;",
+            ContactFormOnly {}
         }
     }
 }

@@ -5,7 +5,7 @@
 
 use dioxus::prelude::*;
 
-pub use views::{About, Blog, Contact, Home, Navbar};
+pub use views::{About, Blog, Contact, ContactFormOnly, Home, Navbar};
 
 /// Define a components module that contains all shared components for our app.
 mod components;
