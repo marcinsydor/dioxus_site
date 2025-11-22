@@ -1047,7 +1047,7 @@ pub fn generate_hybrid_contact_page(
         "Contact - Dioxus Site",
         "Get in touch with me through this interactive contact form",
         &content,
-        Some(&js_path),
+        None, // Don't add script tag here - we import it manually in the inline script
         Some(additional_css),
     );
 
