@@ -5,7 +5,7 @@
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
-    <meta name="description" content="Get in touch with me through this contact form">
+    <meta name="description" content="Get in touch with me through this interactive contact form">
 
     <!-- Styles -->
     <link rel="stylesheet" href="/assets/styling/main.css">
@@ -21,11 +21,12 @@
 
     <!-- Additional meta tags for SEO -->
     <meta property="og:title" content="Contact - Dioxus Site">
-    <meta property="og:description" content="Get in touch with me through this contact form">
+    <meta property="og:description" content="Get in touch with me through this interactive contact form">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Contact - Dioxus Site">
-    <meta name="twitter:description" content="Get in touch with me through this contact form">
+    <meta name="twitter:description" content="Get in touch with me through this interactive contact form">
+    <link rel="preload" as="script" href="/assets/dioxus_site-dxh71439c95d26eaab0.js" crossorigin>
 </head>
 <body>
     <div id="main"><div id="navbar">
@@ -37,7 +38,7 @@
     <div class="contact-container">
         <header class="contact-header">
             <h1 class="contact-title">Contact Me</h1>
-            <p class="contact-subtitle">Get in touch! This page will demonstrate dynamic JavaScript/WASM functionality.</p>
+            <p class="contact-subtitle">Get in touch! This form is powered by WebAssembly for interactive functionality.</p>
         </header>
 
         <div class="contact-content">
@@ -71,53 +72,17 @@
             <div class="contact-form-section">
                 <h2>Send a Message</h2>
 
-                <div class="js-functionality-notice">
-                    <p>🚀 <strong>Dynamic Form Demo:</strong> This form will demonstrate JavaScript/WASM functionality when enhanced with dynamic features.</p>
+                <div class="wasm-loading-notice">
+                    <p>🚀 <strong>Interactive WASM Form:</strong> Loading WebAssembly-powered contact form...</p>
+                    <div id="wasm-fallback" style="display: none;">
+                        <p>⚠️ WebAssembly failed to load. Please enable JavaScript or try refreshing the page.</p>
+                    </div>
                 </div>
 
-                <div class="static-form-notice">
-                    <h3>📄 Static Version</h3>
-                    <p>You're viewing the static HTML version. The form below is for display purposes.</p>
-                    <p>When JavaScript is enabled, this becomes a fully interactive form with:</p>
-                    <ul>
-                        <li>Real-time validation</li>
-                        <li>Dynamic state management</li>
-                        <li>Client-side form processing</li>
-                        <li>WASM-powered functionality</li>
-                    </ul>
+                <!-- This will be replaced by the WASM contact app -->
+                <div id="contact-form-placeholder">
+                    <p>Loading interactive form...</p>
                 </div>
-
-                <form class="contact-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="name">Name *</label>
-                            <input type="text" id="name" class="form-input" placeholder="Your full name" />
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email *</label>
-                            <input type="email" id="email" class="form-input" placeholder="your.email@example.com" />
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="subject">Subject *</label>
-                        <input type="text" id="subject" class="form-input" placeholder="What's this about?" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="message">Message *</label>
-                        <textarea id="message" class="form-textarea" placeholder="Tell me what's on your mind..." rows="6"></textarea>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-primary disabled">Send Message ✨ (Demo)</button>
-                        <button type="button" class="btn btn-secondary">Reset Form</button>
-                    </div>
-
-                    <div class="form-note">
-                        <p>* This is a static demo form. Enable JavaScript to see dynamic functionality.</p>
-                    </div>
-                </form>
             </div>
         </div>
 
@@ -126,7 +91,7 @@
             <div class="tech-grid">
                 <div class="tech-item">
                     <h3>🦀 WebAssembly</h3>
-                    <p>Dynamic version uses Rust compiled to WASM for all interactive functionality</p>
+                    <p>Interactive form powered by Rust compiled to WASM (/assets/dioxus_site_bg-dxhf217d2c2d17bff9c.wasm)</p>
                 </div>
                 <div class="tech-item">
                     <h3>⚡ Reactive State</h3>
@@ -134,15 +99,44 @@
                 </div>
                 <div class="tech-item">
                     <h3>🏗️ Hybrid Architecture</h3>
-                    <p>Static HTML foundation with dynamic JavaScript/WASM enhancement</p>
+                    <p>Server-rendered HTML enhanced with client-side WASM</p>
                 </div>
                 <div class="tech-item">
                     <h3>📱 Progressive Enhancement</h3>
-                    <p>Works without JS, enhanced with dynamic features when available</p>
+                    <p>Works with basic HTML, enhanced with dynamic features</p>
                 </div>
             </div>
         </div>
-    </div></div>
+    </div>
+
+<script type="module">
+    import init, { start_contact_app } from '/assets/dioxus_site-dxh71439c95d26eaab0.js';
+
+    async function loadWasm() {
+        try {
+            // Initialize the WASM module
+            await init();
+            console.log('✅ WASM loaded successfully');
+
+            // Start the contact app
+            start_contact_app();
+            console.log('✅ Contact app started');
+
+        } catch (error) {
+            console.error('❌ Failed to load WASM:', error);
+            document.getElementById('wasm-fallback').style.display = 'block';
+        }
+    }
+
+    loadWasm();
+</script>
+
+<noscript>
+    <div style="position: fixed; bottom: 1rem; right: 1rem; padding: 1rem; background: #fee; border: 1px solid #fcc; border-radius: 0.5rem; font-size: 0.875rem; max-width: 300px; z-index: 1000;">
+        <p style="margin: 0; font-weight: bold; color: #c33;">⚠️ JavaScript Required</p>
+        <p style="margin: 0.5rem 0 0 0; color: #c33;">This page requires JavaScript for interactive functionality.</p>
+    </div>
+</noscript></div>
 
     <!-- Static site notice -->
     <noscript>

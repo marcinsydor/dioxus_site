@@ -2,6 +2,7 @@
 //! This binary generates static HTML files for all routes
 
 use dioxus::prelude::*;
+use std::env;
 use std::fs;
 use std::path::Path;
 
@@ -9,18 +10,27 @@ use std::path::Path;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("🏗️  Starting static site generation...");
 
-    // Create output directory
+    let args: Vec<String> = env::args().collect();
+    let skip_contact = args.contains(&"--skip-contact".to_string());
+
     let output_dir = Path::new("static_output");
+
+    // Clean and create output directory
     if output_dir.exists() {
         fs::remove_dir_all(output_dir)?;
     }
     fs::create_dir_all(output_dir)?;
-    fs::create_dir_all(output_dir.join("assets"))?;
 
-    // Generate static pages
+    // Generate all pages
     generate_home_page(output_dir)?;
     generate_about_page(output_dir)?;
-    generate_contact_page(output_dir)?;
+
+    if !skip_contact {
+        generate_contact_page(output_dir)?;
+    } else {
+        println!("⏭️  Skipping contact page generation");
+    }
+
     generate_blog_pages(output_dir)?;
 
     // Copy assets
@@ -53,9 +63,10 @@ fn generate_home_page(output_dir: &Path) -> Result<(), Box<dyn std::error::Error
     </div>"#;
 
     let html = create_html_document(
-        content,
         "Home - Dioxus Site",
         "Welcome to my Dioxus-powered website",
+        content,
+        None,
     );
 
     fs::write(output_dir.join("index.html"), html)?;
@@ -189,9 +200,10 @@ fn generate_about_page(output_dir: &Path) -> Result<(), Box<dyn std::error::Erro
     );
 
     let html = create_html_document(
-        &content,
         "About - Dioxus Site",
         "Learn more about me and my work",
+        &content,
+        None,
     );
 
     let about_dir = output_dir.join("about");
@@ -202,8 +214,12 @@ fn generate_about_page(output_dir: &Path) -> Result<(), Box<dyn std::error::Erro
 }
 
 fn generate_contact_page(output_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
-    println!("🔨 Generating: /contact");
+    println!("🔨 Generating: /contact (static version)");
+    generate_static_contact_page(output_dir)?;
+    Ok(())
+}
 
+fn generate_static_contact_page(output_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
     let content = r#"<div id="navbar">
         <a href="/">Home</a>
         <a href="/about">About</a>
@@ -321,9 +337,10 @@ fn generate_contact_page(output_dir: &Path) -> Result<(), Box<dyn std::error::Er
     </div>"#;
 
     let html = create_html_document(
-        content,
         "Contact - Dioxus Site",
         "Get in touch with me through this contact form",
+        content,
+        None,
     );
 
     let contact_dir = output_dir.join("contact");
@@ -386,9 +403,10 @@ fn generate_blog_pages(output_dir: &Path) -> Result<(), Box<dyn std::error::Erro
         );
 
         let html = create_html_document(
-            &content,
             &format!("Blog Post {} - Dioxus Site", id),
             &format!("Blog post number {}", id),
+            &content,
+            None,
         );
 
         let blog_dir = output_dir.join("blog").join(id.to_string());
@@ -400,7 +418,21 @@ fn generate_blog_pages(output_dir: &Path) -> Result<(), Box<dyn std::error::Erro
     Ok(())
 }
 
-fn create_html_document(body_content: &str, title: &str, description: &str) -> String {
+fn create_html_document(
+    title: &str,
+    description: &str,
+    body_content: &str,
+    js_path: Option<&str>,
+) -> String {
+    let js_preload = if let Some(js) = js_path {
+        format!(
+            r#"<link rel="preload" as="script" href="{}" crossorigin>"#,
+            js
+        )
+    } else {
+        String::new()
+    };
+
     format!(
         r#"<!DOCTYPE html>
 <html>
@@ -430,6 +462,7 @@ fn create_html_document(body_content: &str, title: &str, description: &str) -> S
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="{title}">
     <meta name="twitter:description" content="{description}">
+    {js_preload}
 </head>
 <body>
     <div id="main">{body_content}</div>
@@ -523,6 +556,7 @@ fn create_html_document(body_content: &str, title: &str, description: &str) -> S
 </body>
 </html>"#,
         title = title,
+        js_preload = js_preload,
         description = description,
         body_content = body_content
     )
@@ -542,22 +576,173 @@ fn copy_assets(output_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn copy_dir_recursive(src: &Path, dest: &Path) -> Result<(), Box<dyn std::error::Error>> {
-    if !dest.exists() {
-        fs::create_dir_all(dest)?;
+fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<(), Box<dyn std::error::Error>> {
+    if !dst.exists() {
+        std::fs::create_dir_all(dst)?;
     }
 
-    for entry in fs::read_dir(src)? {
+    for entry in std::fs::read_dir(src)? {
         let entry = entry?;
         let src_path = entry.path();
-        let dest_path = dest.join(entry.file_name());
+        let dst_path = dst.join(entry.file_name());
 
         if src_path.is_dir() {
-            copy_dir_recursive(&src_path, &dest_path)?;
+            copy_dir_recursive(&src_path, &dst_path)?;
         } else {
-            fs::copy(&src_path, &dest_path)?;
+            std::fs::copy(&src_path, &dst_path)?;
         }
     }
 
+    Ok(())
+}
+
+pub fn generate_hybrid_contact_page(
+    output_dir: &Path,
+    wasm_assets_dir: &Path,
+) -> Result<(), Box<dyn std::error::Error>> {
+    println!("🔨 Generating: /contact (hybrid with WASM)");
+
+    // Find the WASM and JS files
+    let mut wasm_file = None;
+    let mut js_file = None;
+
+    for entry in std::fs::read_dir(wasm_assets_dir)? {
+        let entry = entry?;
+        let file_name = entry.file_name().to_string_lossy().to_string();
+
+        if file_name.contains("dioxus_site_bg") && file_name.ends_with(".wasm") {
+            wasm_file = Some(format!("/assets/{}", file_name));
+        } else if file_name.contains("dioxus_site") && file_name.ends_with(".js") {
+            js_file = Some(format!("/assets/{}", file_name));
+        }
+    }
+
+    let wasm_path = wasm_file.ok_or("WASM file not found")?;
+    let js_path = js_file.ok_or("JS file not found")?;
+
+    let content = format!(
+        r#"<div id="navbar">
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+        <a href="/blog/1">Blog</a>
+    </div>
+    <div class="contact-container">
+        <header class="contact-header">
+            <h1 class="contact-title">Contact Me</h1>
+            <p class="contact-subtitle">Get in touch! This form is powered by WebAssembly for interactive functionality.</p>
+        </header>
+
+        <div class="contact-content">
+            <div class="contact-info">
+                <h2>Contact Information</h2>
+                <div class="contact-methods">
+                    <div class="contact-method">
+                        <span class="contact-icon">📧</span>
+                        <div>
+                            <h3>Email</h3>
+                            <a href="mailto:marcin.sydor@sky.uk" class="contact-link">marcin.sydor@sky.uk</a>
+                        </div>
+                    </div>
+                    <div class="contact-method">
+                        <span class="contact-icon">💼</span>
+                        <div>
+                            <h3>LinkedIn</h3>
+                            <p>Connect with me professionally</p>
+                        </div>
+                    </div>
+                    <div class="contact-method">
+                        <span class="contact-icon">⚡</span>
+                        <div>
+                            <h3>GitHub</h3>
+                            <a href="https://github.com/marcinsydor" target="_blank" class="contact-link">@marcinsydor</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-form-section">
+                <h2>Send a Message</h2>
+
+                <div class="wasm-loading-notice">
+                    <p>🚀 <strong>Interactive WASM Form:</strong> Loading WebAssembly-powered contact form...</p>
+                    <div id="wasm-fallback" style="display: none;">
+                        <p>⚠️ WebAssembly failed to load. Please enable JavaScript or try refreshing the page.</p>
+                    </div>
+                </div>
+
+                <!-- This will be replaced by the WASM contact app -->
+                <div id="contact-form-placeholder">
+                    <p>Loading interactive form...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tech-details">
+            <h2>🔧 Technical Implementation</h2>
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <h3>🦀 WebAssembly</h3>
+                    <p>Interactive form powered by Rust compiled to WASM ({wasm_path})</p>
+                </div>
+                <div class="tech-item">
+                    <h3>⚡ Reactive State</h3>
+                    <p>Real-time form validation and state management using Dioxus signals</p>
+                </div>
+                <div class="tech-item">
+                    <h3>🏗️ Hybrid Architecture</h3>
+                    <p>Server-rendered HTML enhanced with client-side WASM</p>
+                </div>
+                <div class="tech-item">
+                    <h3>📱 Progressive Enhancement</h3>
+                    <p>Works with basic HTML, enhanced with dynamic features</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script type="module">
+    import init, {{ start_contact_app }} from '{js_path}';
+
+    async function loadWasm() {{
+        try {{
+            // Initialize the WASM module
+            await init();
+            console.log('✅ WASM loaded successfully');
+
+            // Start the contact app
+            start_contact_app();
+            console.log('✅ Contact app started');
+
+        }} catch (error) {{
+            console.error('❌ Failed to load WASM:', error);
+            document.getElementById('wasm-fallback').style.display = 'block';
+        }}
+    }}
+
+    loadWasm();
+</script>
+
+<noscript>
+    <div style="position: fixed; bottom: 1rem; right: 1rem; padding: 1rem; background: #fee; border: 1px solid #fcc; border-radius: 0.5rem; font-size: 0.875rem; max-width: 300px; z-index: 1000;">
+        <p style="margin: 0; font-weight: bold; color: #c33;">⚠️ JavaScript Required</p>
+        <p style="margin: 0.5rem 0 0 0; color: #c33;">This page requires JavaScript for interactive functionality.</p>
+    </div>
+</noscript>"#
+    );
+
+    let html_doc = create_html_document(
+        "Contact - Dioxus Site",
+        "Get in touch with me through this interactive contact form",
+        &content,
+        Some(&js_path),
+    );
+
+    let contact_dir = output_dir.join("contact");
+    std::fs::create_dir_all(&contact_dir)?;
+    let index_path = contact_dir.join("index.html");
+    std::fs::write(&index_path, html_doc)?;
+
+    println!("✅ Generated: contact/index.html (hybrid with WASM)");
     Ok(())
 }

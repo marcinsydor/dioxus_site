@@ -16,19 +16,24 @@ generate-static:
 	@echo "✅ Static site generation complete!"
 
 # Build hybrid site (static + interactive Contact page with WASM)
-build-hybrid: generate-static
+build-hybrid:
+	@echo "🧹 Cleaning static output..."
+	rm -rf static_output
+	@echo "🏗️  Generating static site (except contact)..."
+	cargo run --bin generate_static --features ssr -- --skip-contact
 	@echo "🔧 Building interactive Contact page with WASM..."
 	dx build --release --features web
-	@echo "📦 Adding interactive Contact page to static output..."
-	mkdir -p static_output/contact/assets
-	cp target/dx/dioxus_site/release/web/public/index.html static_output/contact/contact_dynamic.html
-	cp -r target/dx/dioxus_site/release/web/public/assets/* static_output/contact/assets/
+	@echo "📦 Adding WASM assets to static output..."
+	mkdir -p static_output/assets
+	cp -r target/dx/dioxus_site/release/web/public/assets/* static_output/assets/
+	@echo "🏗️  Generating hybrid Contact page with WASM..."
+	cargo run --bin generate_hybrid_contact --features ssr
 	@echo "✅ Hybrid build complete! Static pages + Interactive Contact with WASM"
 
 # Build static site (default)
 build: generate-static
 
-# Clean and copy static files to docs folder
+# Clean and copy static files to docs folder (static build)
 deploy: build
 	@echo "🧹 Cleaning docs folder..."
 	rm -rf docs
@@ -45,6 +50,27 @@ deploy: build
 	@echo "Generated files:"
 	@find docs -name "*.html" -exec echo "  📄 {}" \;
 
+# Deploy hybrid build with WASM-enabled contact page
+deploy-hybrid: build-hybrid
+	@echo "🧹 Cleaning docs folder..."
+	rm -rf docs
+	mkdir -p docs
+	@echo "📦 Copying hybrid static files to docs..."
+	cp -r static_output/* docs/
+	@echo "📄 Copying robots.txt..."
+	cp assets/robots.txt docs/
+	@echo "🌐 Copying CNAME..."
+	cp CNAME docs/
+	@echo "✅ Hybrid deployment preparation complete!"
+	@echo "📂 Hybrid site (static + WASM contact) ready in the docs/ folder"
+	@echo ""
+	@echo "Generated files:"
+	@find docs -name "*.html" -exec echo "  📄 {}" \;
+	@echo ""
+	@echo "WASM files:"
+	@find docs -name "*.wasm" -exec echo "  🦀 {}" \;
+	@find docs -name "*dioxus_site*.js" -exec echo "  📄 {}" \;
+
 # Build, deploy, and automatically commit and push to GitHub
 publish: deploy
 	@echo "🚀 Committing and pushing to GitHub..."
@@ -52,6 +78,14 @@ publish: deploy
 	git commit -m "deploy static site $$(date '+%Y-%m-%d %H:%M:%S')"
 	git push origin main
 	@echo "✅ Published to GitHub!"
+
+# Build hybrid, deploy, and automatically commit and push to GitHub
+publish-hybrid: deploy-hybrid
+	@echo "🚀 Committing and pushing hybrid site to GitHub..."
+	git add docs/
+	git commit -m "deploy hybrid site (static + WASM contact) $$(date '+%Y-%m-%d %H:%M:%S')"
+	git push origin main
+	@echo "✅ Hybrid site published to GitHub!"
 
 # Clean all build artifacts
 clean:
@@ -70,7 +104,9 @@ help:
 	@echo "  make build-hybrid  - Build static site + interactive Contact page with WASM"
 	@echo "  make generate-static - Generate static HTML files for all routes"
 	@echo "  make deploy        - Build static site and prepare for GitHub Pages"
+	@echo "  make deploy-hybrid - Build hybrid site and prepare for GitHub Pages"
 	@echo "  make publish       - Build, deploy, commit and push to GitHub"
+	@echo "  make publish-hybrid - Build hybrid, deploy, commit and push to GitHub"
 	@echo "  make clean         - Clean all build artifacts"
 	@echo "  make help          - Show this help message"
 	@echo ""

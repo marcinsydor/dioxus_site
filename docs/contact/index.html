@@ -72,11 +72,8 @@
             <div class="contact-form-section">
                 <h2>Send a Message</h2>
 
-                <div class="wasm-loading-notice">
-                    <p>🚀 <strong>Interactive WASM Form:</strong> Loading WebAssembly-powered contact form...</p>
-                    <div id="wasm-fallback" style="display: none;">
-                        <p>⚠️ WebAssembly failed to load. Please enable JavaScript or try refreshing the page.</p>
-                    </div>
+                <div class="js-loading-notice">
+                    <p>🚀 <strong>Interactive Form:</strong> Loading JavaScript-powered contact form...</p>
                 </div>
 
                 <!-- This will be replaced by the WASM contact app -->
@@ -90,8 +87,8 @@
             <h2>🔧 Technical Implementation</h2>
             <div class="tech-grid">
                 <div class="tech-item">
-                    <h3>🦀 WebAssembly</h3>
-                    <p>Interactive form powered by Rust compiled to WASM (/assets/dioxus_site_bg-dxhf217d2c2d17bff9c.wasm)</p>
+                    <h3>🚀 JavaScript</h3>
+                    <p>Interactive form powered by modern JavaScript with real-time validation</p>
                 </div>
                 <div class="tech-item">
                     <h3>⚡ Reactive State</h3>
@@ -99,7 +96,7 @@
                 </div>
                 <div class="tech-item">
                     <h3>🏗️ Hybrid Architecture</h3>
-                    <p>Server-rendered HTML enhanced with client-side WASM</p>
+                    <p>Server-rendered HTML enhanced with client-side JavaScript</p>
                 </div>
                 <div class="tech-item">
                     <h3>📱 Progressive Enhancement</h3>
@@ -109,26 +106,242 @@
         </div>
     </div>
 
-<script type="module">
-    import init, { start_contact_app } from '/assets/dioxus_site-dxh71439c95d26eaab0.js';
+<script>
+    // Pure JavaScript contact form implementation
+    function initContactForm() {
+        console.log('✅ Initializing interactive contact form');
 
-    async function loadWasm() {
-        try {
-            // Initialize the WASM module
-            await init();
-            console.log('✅ WASM loaded successfully');
+        // Replace placeholder with interactive form
+        const placeholder = document.getElementById('contact-form-placeholder');
+        if (!placeholder) return;
 
-            // Start the contact app
-            start_contact_app();
-            console.log('✅ Contact app started');
+        placeholder.innerHTML = `
+            <form id="contact-form" class="contact-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="contact-name">Name *</label>
+                        <input type="text" id="contact-name" class="form-input" placeholder="Your full name" required />
+                        <div class="error-message" id="name-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-email">Email *</label>
+                        <input type="email" id="contact-email" class="form-input" placeholder="your.email@example.com" required />
+                        <div class="error-message" id="email-error"></div>
+                    </div>
+                </div>
 
-        } catch (error) {
-            console.error('❌ Failed to load WASM:', error);
-            document.getElementById('wasm-fallback').style.display = 'block';
+                <div class="form-group">
+                    <label for="contact-subject">Subject *</label>
+                    <input type="text" id="contact-subject" class="form-input" placeholder="What's this about?" required />
+                    <div class="error-message" id="subject-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="contact-message">Message *</label>
+                    <textarea id="contact-message" class="form-textarea" placeholder="Tell me what's on your mind..." rows="6" required></textarea>
+                    <div class="error-message" id="message-error"></div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" id="submit-btn" class="btn btn-primary">Send Message ✨</button>
+                    <button type="button" id="reset-btn" class="btn btn-secondary">Reset Form</button>
+                </div>
+
+                <div class="form-status" id="form-status"></div>
+
+                <div class="form-note">
+                    <p>🚀 <strong>Interactive Demo:</strong> This form demonstrates client-side validation and processing!</p>
+                </div>
+            </form>
+
+            <style>
+                .error-message {
+                    color: #dc2626;
+                    font-size: 0.875rem;
+                    margin-top: 0.25rem;
+                    min-height: 1.25rem;
+                }
+                .form-status {
+                    margin-top: 1rem;
+                    padding: 1rem;
+                    border-radius: 0.5rem;
+                    text-align: center;
+                    font-weight: 500;
+                }
+                .form-status.success {
+                    background-color: #dcfce7;
+                    color: #166534;
+                    border: 1px solid #bbf7d0;
+                }
+                .form-status.error {
+                    background-color: #fef2f2;
+                    color: #dc2626;
+                    border: 1px solid #fecaca;
+                }
+                .form-input:focus, .form-textarea:focus {
+                    outline: 2px solid #3b82f6;
+                    outline-offset: 2px;
+                }
+                .form-input.error, .form-textarea.error {
+                    border-color: #dc2626;
+                }
+                .btn:disabled {
+                    opacity: 0.6;
+                    cursor: not-allowed;
+                }
+            </style>
+        `;
+
+        // Set up event listeners
+        setupFormListeners();
+        console.log('✅ Contact form initialized successfully');
+    }
+
+    function setupFormListeners() {
+        const form = document.getElementById('contact-form');
+        const resetBtn = document.getElementById('reset-btn');
+
+        if (form) {
+            form.addEventListener('submit', handleFormSubmit);
+        }
+
+        if (resetBtn) {
+            resetBtn.addEventListener('click', handleFormReset);
+        }
+
+        // Real-time validation
+        ['contact-name', 'contact-email', 'contact-subject', 'contact-message'].forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener('blur', () => validateField(id));
+            }
+        });
+    }
+
+    function validateField(fieldId) {
+        const input = document.getElementById(fieldId);
+        if (!input) return false;
+
+        const value = input.value;
+        const errorId = fieldId.replace('contact-', '') + '-error';
+        const errorElem = document.getElementById(errorId);
+
+        let isValid = true;
+        let errorMsg = '';
+
+        switch (fieldId) {
+            case 'contact-name':
+                isValid = value.trim().length > 0;
+                errorMsg = 'Name is required';
+                break;
+            case 'contact-email':
+                isValid = value.trim().length > 0 && value.includes('@');
+                errorMsg = 'Valid email is required';
+                break;
+            case 'contact-subject':
+                isValid = value.trim().length > 0;
+                errorMsg = 'Subject is required';
+                break;
+            case 'contact-message':
+                isValid = value.trim().length > 0;
+                errorMsg = 'Message is required';
+                break;
+        }
+
+        if (isValid) {
+            input.classList.remove('error');
+            if (errorElem) errorElem.textContent = '';
+        } else {
+            input.classList.add('error');
+            if (errorElem) errorElem.textContent = errorMsg;
+        }
+
+        return isValid;
+    }
+
+    function handleFormSubmit(e) {
+        e.preventDefault();
+
+        // Validate all fields
+        const fields = ['contact-name', 'contact-email', 'contact-subject', 'contact-message'];
+        const isAllValid = fields.every(fieldId => validateField(fieldId));
+
+        if (!isAllValid) {
+            showStatus('Please fix the errors above', 'error');
+            return;
+        }
+
+        // Get form data
+        const formData = {
+            name: document.getElementById('contact-name').value,
+            email: document.getElementById('contact-email').value,
+            subject: document.getElementById('contact-subject').value,
+            message: document.getElementById('contact-message').value,
+            submitted_at: new Date().toISOString()
+        };
+
+        // Disable submit button
+        const submitBtn = document.getElementById('submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending...';
+        }
+
+        // Simulate form submission
+        console.log('📧 Form submitted:', formData);
+
+        // Show success message
+        setTimeout(() => {
+            showStatus(`✅ Thank you, ${formData.name}! Your message has been received. (This is a demo)`, 'success');
+
+            // Re-enable submit button
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Send Message ✨';
+            }
+        }, 1000);
+    }
+
+    function handleFormReset() {
+        // Clear all form fields
+        ['contact-name', 'contact-email', 'contact-subject', 'contact-message'].forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.value = '';
+                input.classList.remove('error');
+            }
+        });
+
+        // Clear error messages
+        ['name-error', 'email-error', 'subject-error', 'message-error'].forEach(id => {
+            const errorElem = document.getElementById(id);
+            if (errorElem) errorElem.textContent = '';
+        });
+
+        // Clear status
+        const status = document.getElementById('form-status');
+        if (status) {
+            status.textContent = '';
+            status.className = 'form-status';
+        }
+
+        console.log('🔄 Form reset');
+    }
+
+    function showStatus(message, type) {
+        const statusElem = document.getElementById('form-status');
+        if (statusElem) {
+            statusElem.textContent = message;
+            statusElem.className = `form-status ${type}`;
         }
     }
 
-    loadWasm();
+    // Initialize when DOM is loaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initContactForm);
+    } else {
+        initContactForm();
+    }
 </script>
 
 <noscript>
