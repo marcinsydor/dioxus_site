@@ -18,6 +18,10 @@ deploy: build
 	cp assets/robots.txt docs/
 	@echo "🌐 Copying CNAME..."
 	cp CNAME docs/
+	@echo "🔧 Setting up SPA routing for GitHub Pages..."
+	cp assets/404.html docs/
+	@echo "🧩 Adding SPA redirect script to index.html..."
+	python3 scripts/add-spa-routing.py docs/index.html
 	@echo "✅ Build and deploy preparation complete!"
 	@echo "📂 Files are ready in the docs/ folder"
 
