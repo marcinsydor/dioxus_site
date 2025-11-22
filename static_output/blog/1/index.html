@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Home - Dioxus Site</title>
+    <title>Blog Post 1 - Dioxus Site</title>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
-    <meta name="description" content="Welcome to my Dioxus-powered website">
+    <meta name="description" content="Blog post number 1">
 
     <!-- Styles -->
     <link rel="stylesheet" href="/assets/styling/main.css">
@@ -19,29 +19,42 @@
     <link rel="icon" href="/assets/favicon.ico">
 
     <!-- Additional meta tags for SEO -->
-    <meta property="og:title" content="Home - Dioxus Site">
-    <meta property="og:description" content="Welcome to my Dioxus-powered website">
+    <meta property="og:title" content="Blog Post 1 - Dioxus Site">
+    <meta property="og:description" content="Blog post number 1">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Home - Dioxus Site">
-    <meta name="twitter:description" content="Welcome to my Dioxus-powered website">
+    <meta name="twitter:title" content="Blog Post 1 - Dioxus Site">
+    <meta name="twitter:description" content="Blog post number 1">
 </head>
 <body>
     <div id="main"><div id="navbar">
-        <a href="/">Home</a>
-        <a href="/about">About</a>
-        <a href="/blog/1">Blog</a>
-    </div>
-    <div class="container">
-        <h1>Welcome to Dioxus Site</h1>
-        <p>This is the home page of my Dioxus-powered website.</p>
-        <nav>
-            <ul>
-                <li><a href="/about">Learn about me</a></li>
-                <li><a href="/blog/1">Read my blog</a></li>
-            </ul>
-        </nav>
-    </div></div>
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/blog/1">Blog</a>
+        </div>
+        <div class="container">
+            <h1>Blog Post 1</h1>
+            <div class="blog-content">
+                <p>This is blog post number 1.</p>
+                <p>In a real application, this content would be loaded from a database or markdown files.</p>
+
+                <h2>Sample Content</h2>
+                <p>Here's some sample content for blog post 1. This demonstrates how static site generation works with Dioxus.</p>
+
+                <h3>Benefits of SSG</h3>
+                <ul>
+                    <li>Fast loading times</li>
+                    <li>Great SEO</li>
+                    <li>Works without JavaScript</li>
+                    <li>Easy to deploy</li>
+                </ul>
+
+                <nav class="blog-nav">
+                    <a href="/">← Back to Home</a>
+                    <a href="/blog/2">Next →</a>
+                </nav>
+            </div>
+        </div></div>
 
     <!-- Static site notice -->
     <noscript>

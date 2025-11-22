@@ -6,9 +6,20 @@ edition = "2021"
 
 [dependencies]
 dioxus = { version = "0.7.1", features = ["router"] }
+dioxus-ssr = "0.7.1"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+tokio = { version = "1.0", features = ["full"] }
 
 [features]
 default = ["web"]
 web = ["dioxus/web"]
+ssr = ["dioxus/ssr"]
+
+[[bin]]
+name = "dioxus_site"
+path = "src/main.rs"
+
+[[bin]]
+name = "generate_static"
+path = "src/generate_static.rs"

@@ -3,7 +3,6 @@ name = "dioxus_site"
 
 [web.app]
 title = "dioxus_site"
-base_path = ""
 
 [web.resource]
 style = []
@@ -12,6 +11,3 @@ script = []
 [web.resource.dev]
 style = []
 script = []
-
-[web.watcher]
-watch_path = ["src", "assets"]

@@ -1,0 +1,36 @@
+{
+  "name": "Marcin Sydor",
+  "title": "Software Engineer",
+  "location": "United Kingdom",
+  "bio": "Passionate software engineer with expertise in Rust, web development, and modern frameworks. I enjoy building efficient, scalable applications and exploring new technologies.",
+  "skills": [
+    "Rust",
+    "JavaScript/TypeScript",
+    "React",
+    "Dioxus",
+    "Web Development",
+    "System Programming",
+    "DevOps"
+  ],
+  "experience": [
+    {
+      "company": "Sky UK",
+      "position": "Software Engineer",
+      "duration": "Current",
+      "description": "Working on innovative software solutions and modern web technologies."
+    }
+  ],
+  "interests": [
+    "Open Source Development",
+    "Rust Ecosystem",
+    "Web Assembly",
+    "Static Site Generation",
+    "Modern Web Frameworks"
+  ],
+  "contact": {
+    "email": "marcin.sydor@sky.uk",
+    "website": "https://sydor.co",
+    "github": "marcinsydor"
+  },
+  "updated": "2025-11-22"
+}
