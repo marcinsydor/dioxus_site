@@ -959,14 +959,26 @@ pub fn generate_hybrid_contact_page(
     </div>
 
 <script type="module">
-    import init, {{ mount_contact_component, wasm_main }} from '{js_path}';
+    import {{ mount_contact_component, wasm_main }} from '{js_path}';
 
     async function loadWasmContactForm() {{
         try {{
             console.log('🚀 Loading WASM Contact Form...');
 
-            // Wait for the WASM module to initialize
-            await init();
+            // Wait for the auto-initialization to complete
+            // The module auto-initializes on import, so we need to wait for it
+            let retries = 0;
+            const maxRetries = 50; // 5 seconds max (50 * 100ms)
+
+            while (!globalThis.__dx_mainWasm && retries < maxRetries) {{
+                await new Promise(resolve => setTimeout(resolve, 100));
+                retries++;
+            }}
+
+            if (!globalThis.__dx_mainWasm) {{
+                throw new Error('WASM module failed to initialize within timeout');
+            }}
+
             console.log('✅ WASM module initialized successfully');
 
             // Initialize the Dioxus runtime

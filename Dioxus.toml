@@ -4,6 +4,10 @@ name = "dioxus_site"
 [web.app]
 title = "dioxus_site"
 
+[web.watcher]
+# Disable auto-initialization so we can manually control when WASM loads
+manual_init = true
+
 [web.resource]
 style = []
 script = []
