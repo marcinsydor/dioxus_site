@@ -220,7 +220,7 @@ body {
     }
     
     </style>
-    <script type="module" src="/assets/dioxus_site-dxh71439c95d26eaab0.js"></script>
+    <script type="module" src="/assets/dioxus_site-dxh95557dcc5869d3cf.js"></script>
 </head>
 <body>
     <div id="navbar">
@@ -307,14 +307,14 @@ body {
     </div>
 
 <script type="module">
-    import init, { mount_contact_component, wasm_main } from '/assets/dioxus_site-dxh71439c95d26eaab0.js';
+    import init, { mount_contact_component, wasm_main } from '/assets/dioxus_site-dxh95557dcc5869d3cf.js';
 
     async function loadWasmContactForm() {
         try {
             console.log('🚀 Loading WASM Contact Form...');
 
-            // Initialize the WASM module
-            await init();
+            // Initialize the WASM module with the correct WASM file path
+            await init('/assets/dioxus_site_bg-dxh806da93b8af814fc.wasm');
             console.log('✅ WASM module loaded successfully');
 
             // Initialize WASM (calls wasm_main)

@@ -6,8 +6,7 @@ use std::env;
 use std::fs;
 use std::path::Path;
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("🏗️  Starting static site generation...");
 
     let args: Vec<String> = env::args().collect();
@@ -870,9 +869,10 @@ pub fn generate_hybrid_contact_page(
     }
 
     let js_path = js_file.ok_or("JS file with mount_contact_component export not found")?;
-    let _wasm_path = wasm_file.ok_or("WASM file not found")?;
+    let wasm_path = wasm_file.ok_or("WASM file not found")?;
 
     println!("🎯 Using JS file: {}", js_path);
+    println!("🎯 Using WASM file: {}", wasm_path);
 
     let content = format!(
         r#"<div id="navbar">
@@ -965,8 +965,8 @@ pub fn generate_hybrid_contact_page(
         try {{
             console.log('🚀 Loading WASM Contact Form...');
 
-            // Initialize the WASM module
-            await init();
+            // Initialize the WASM module with the correct WASM file path
+            await init('{wasm_path}');
             console.log('✅ WASM module loaded successfully');
 
             // Initialize WASM (calls wasm_main)
@@ -1021,7 +1021,9 @@ pub fn generate_hybrid_contact_page(
         <p style="margin: 0; font-weight: bold; color: #c33;">⚠️ JavaScript Required</p>
         <p style="margin: 0.5rem 0 0 0; color: #c33;">This page requires JavaScript for interactive functionality.</p>
     </div>
-</noscript>"#
+</noscript>"#,
+        js_path = js_path,
+        wasm_path = wasm_path
     );
 
     // Add CSS for loading animation
